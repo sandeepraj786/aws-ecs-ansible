@@ -1,0 +1,80 @@
+- name: Create AWS resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - "vars/perf.yml"
+  tasks:
+    
+    
+    - name: Create ecsInstanceRole
+      iam_role:
+        name: ecsInstanceRole
+        assume_role_policy_document: "{{ lookup('file','files/policy.json') }}"
+        managed_policy:
+          - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        description: ECS instance role
+      register: masspayperf_ecs_instance_role
+    - debug: var=masspayperf_ecs_instance_role verbosity=2
+
+    - name: Create ecsServiceRole
+    #  when: update_all_components == true
+      iam_role:
+        name: ecsServiceRole
+        assume_role_policy_document: "{{ lookup('file','files/policy.json') }}"
+        managed_policy:
+          - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole
+        description: ECS service role
+      register: MasspayPerf_ecs_service_role
+    - debug: var=MasspayPerf_ecs_service_role verbosity=2
+
+
+    #Create an ECS cluster for the application
+    - name: Create ECS cluster
+      tags: setup_ecs
+      ecs_cluster:
+        name: "{{ cluster_name }}"
+        state: "{{ ecs_state }}"
+      register: ecs_cluster
+    - debug: var=ecs_cluster verbosity=2
+
+    - name: Create ECS Launch Configuration
+    #  when: update_all_components == true
+      tags: setup_ecs
+      ec2_lc:
+        name: "{{ cluster_name }}_ec2_lc"
+        state: "{{ ecs_state }}"
+        image_id: "{{ ec2_ami_id }}"
+        key_name: "{{ ec2_key_name }}"
+        security_groups:
+          - "{{group_id}}"
+        instance_type: "{{ ec2_instance_type }}"
+        instance_monitoring: true
+        instance_profile_name: "ecsInstanceRole"
+        assign_public_ip: true
+        user_data: "#!/bin/bash\necho ECS_CLUSTER={{ cluster_name }} >> /etc/ecs/ecs.config"
+      register: ec2_lc
+    - debug: var=ec2_lc verbosity=2
+
+    - name: Create MasspayPerf Auto-scaling group for ECS   
+      tags: setup_ecs
+      ec2_asg:
+        name: "{{ cluster_name }}_ec2_asg"
+        state: present
+        health_check_type: EC2
+        default_cooldown: 300
+        availability_zones:
+          - "{{ vpc_region }}a"
+          - "{{ vpc_region }}b"
+        launch_config_name: "{{ cluster_name }}_ec2_lc"
+        min_size: "{{ ec2_asg_min_size }}"
+        max_size: "{{ ec2_asg_max_size }}"
+        desired_capacity: "{{ ec2_asg_desired_capacity }}"
+        vpc_zone_identifier:
+          - "{{ prv_subnet_a_id }}"
+          - "{{ prv_subnet_b_id }}"
+        wait_for_instances: true
+        tags:
+          - Name: "{{ cluster_name }}_ec2_asg"
+      register: ec2_asg
+    - debug: var=ec2_asg verbosity=2

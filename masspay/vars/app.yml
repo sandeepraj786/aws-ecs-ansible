@@ -1,0 +1,12 @@
+    app_name: morfeusadmin
+    app_image: httpd:2.4
+    container_memory: 300
+    cpu: 10
+    task_definition_name: morfeus-admin
+    container_port: 80
+    host_port: 80
+    host_name: ENV_PARAM
+    host: uat
+    volume_name: superviser
+    source_path: /var/log/superviser
+    container_path: /var/log/supervisor

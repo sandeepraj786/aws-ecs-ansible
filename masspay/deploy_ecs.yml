@@ -1,0 +1,122 @@
+- name: Create AWS resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - "vars/perf.yml"
+    - "vars/app.yml"
+  tasks:
+    #Gather facts related to target group
+    - name: Gather facts related to target group
+      elb_target_group_info:
+        names:
+          - '{{ app_name}}-ecs-tg'
+        region: 'us-east-2'
+      register: ecs_tg
+    - debug: var=ecs_tg verbosity=2
+
+    #Gather facts related to load-balancer
+    - name: Gather facts related to load balancer
+      elb_application_lb_info:
+        names:
+          - '{{ app_name }}-ecs-lb'
+      register: ecs_lb
+    - debug: var=ecs_lb verbosity=2
+
+    #Create a Target group for the above ALB
+    - name: Create target group for ALB to manage traffic to ECS cluster
+      when: '(ecs_tg.target_groups| length == 0)'
+      elb_target_group:
+        name: '{{ app_name}}-ecs-tg'
+        vpc_id: '{{ vpc_id }}'
+        target_type: instance
+        protocol: HTTP
+        port: '{{ tg_port }}'
+        health_check_path: '{{ tg_health_check_path }}'
+        health_check_port: traffic-port
+        health_check_protocol: http
+        unhealthy_threshold_count: '{{ tg_unhealthy_threshold_count }}'
+        healthy_threshold_count: '{{ tg_healthy_threshold_count }}'
+        health_check_timeout: '{{ tg_health_check_timeout }}'
+        health_check_interval: '{{ tg_health_check_interval }}'
+        successful_response_codes: '{{tg_successful_response_codes}}'
+        state: present
+        tags:
+          Name: '{{ app_name}}-ecs-tg'
+      register: ecs_tg_new
+    - debug: var=ecs_tg_new verbosity=2
+
+    #Create a load balancer for ecs target group
+    - name: Create a load balancer for ecs target group
+      when: '(ecs_lb.load_balancers| length == 0)'
+      elb_application_lb:
+        name: '{{ app_name }}-ecs-lb'
+        security_groups: '{{ group_id }}'
+        subnets:
+          - "{{ pbl_subnet_a_id }}"
+          - "{{ pbl_subnet_b_id }}"
+        listeners:
+          - Protocol: HTTP
+            Port: '{{alb_listener_port}}'
+            DefaultActions:
+              - Type: forward
+                TargetGroupName: "{{ ecs_tg.target_groups[0].target_group_name if (ecs_tg.target_groups|length > 0) else ecs_tg_new.target_group_name}}"
+        state: present
+      register: ecs_lb_new
+    - debug: var=ecs_lb_new verbosity=2
+
+    #Create a Task definition for our container
+    - name: Create a task definition for ecs
+      tags: create_td
+      ecs_taskdefinition:
+        state: present
+        family: '{{ task_definition_name }}'
+        network_mode: bridge
+        force_create: true
+        containers:
+          - name: '{{ app_name }}'
+            essential: true
+            image: '{{ app_image }}'
+            cpu: '{{cpu}}'
+            memory: "{{ container_memory}}"
+            environment:
+              - name: "{{host_name}}"
+                value: "{{host}}"
+            portMappings:
+              - containerPort: '{{container_port }}'
+                hostPort: '{{host_port }}'
+                protocol: 'tcp'
+            mountPoints:
+              - containerPath: '{{container_path}}'
+                sourceVolume: '{{volume_name}}'
+        volumes: 
+          - name: '{{volume_name}}'
+            host:
+              sourcePath: '{{source_path}}'
+      register: td
+    - debug: var=td verbosity=2
+    
+    
+    # Create a service using the task definition to be run under our ECS cluster
+    - name: 'Create ECS Service for app - {{ application.app_name }} on ECS cluster - {{ cluster_name }}'
+      tags: create_ecs_svc
+      ecs_service:
+        state: present
+        name: '{{ app_name }}'
+        launch_type: EC2
+        force_new_deployment: yes
+        cluster: '{{ cluster_name }}'
+        task_definition: '{{ td.taskdefinition.family }}:{{ td.taskdefinition.revision }}'
+        desired_count: 1
+        placement_strategy:
+          - type: spread
+            field: attribute:ecs.availability-zone
+        deployment_configuration:
+          minimum_healthy_percent: '{{minimum_healthy_percent}}'
+          maximum_percent: '{{maximum_percent}}'
+        load_balancers:
+          - targetGroupArn: '{{ ecs_tg.target_groups[0].target_group_arn if (ecs_tg.target_groups|length > 0) else ecs_tg_new.target_group_arn }}'
+            containerName: '{{ app_name }}'
+            containerPort: '{{container_port }}'
+      register: ecs_service
+    - debug: var=ecs_service verbosity=2

@@ -1,0 +1,50 @@
+- name: Create AWS resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - "vars/perf.yml"
+    - "vars/app.yml"
+  tasks:
+    - name: Get Service Data
+      ecs_service_info:
+        cluster: "{{cluster_name}}"
+        service: '{{ app_name }}'
+        details: true
+      register: service_data
+
+    - set_fact: with_lb=true
+      when: service_data.services[0].loadBalancers|length == 1
+
+    - set_fact: with_lb=false
+      when: service_data.services[0].loadBalancers|length == 0
+    
+    - name: Set Tasks with ALB to 0
+      ecs_service:
+       name: '{{ app_name }}'
+       state: present
+       desired_count: 0
+       cluster: "{{cluster_name}}"
+       load_balancers:
+         - containerPort: "{{service_data.services[0].loadBalancers[0].containerPort | int}}"
+           containerName: "{{service_data.services[0].loadBalancers[0].containerName}}"
+           targetGroupArn: "{{service_data.services[0].loadBalancers[0].targetGroupArn}}"
+       task_definition: "{{service_data.services[0].taskDefinition}}"
+      when: with_lb|bool
+   
+
+    - name: Set Remaining Tasks to 0
+      ecs_service:
+       name: '{{ app_name }}'
+       state: present
+       desired_count: 0
+       cluster: "{{cluster_name}}"
+       task_definition: "{{service_data.services[0].taskDefinition}}"
+      when: not with_lb|bool
+
+    - name: Delete OLD ECS service
+      ecs_service:
+       state: absent
+       name:  '{{ app_name }}'
+       cluster:  "{{cluster_name}}"
+     

@@ -1,0 +1,92 @@
+---
+cluster_name: "masspayPerf"
+vpc_id: "vpc-09876364f22cfc4cf"
+vpc_cidr: "10.32.0.0/16"
+everywhere_cidr: "0.0.0.0/0"
+vpc_region: "us-east-2"
+
+prv_subnet_a_id: "subnet-043abd9b172daade5"
+prv_subnet_b_id: "subnet-0be1f6e9f9f786e90"
+pbl_subnet_a_id: "subnet-00bbdbb6a1dbef93d"
+pbl_subnet_b_id: "subnet-0c41eb30c5b783f43"
+
+# Security group Ids
+#jump_server_sg_id: "sg-0accdfc02ac3104d5"
+group_id: "sg-0accdfc02ac3104d5"
+
+# If we do not want to create IGW through scripts then set the exact value of gateway Id here
+#igw_gateway_id: "igw-0a2f2b88ad827d28a"
+# Assume that the NAT GW already exist. No need to create them through scripts
+#nat_instance_id: "nat-020a116f7240ed8aa"
+
+# Container details
+#alb_listener_port: 80
+#tg_port: 80
+#tg_health_check_path: "/version"
+#tg_unhealthy_threshold_count: 5
+#tg_healthy_threshold_count: 5
+#tg_health_check_timeout: 60
+#tg_health_check_interval: 120
+
+
+
+# Public ALB settings
+public_alb_scheme: 'internet-facing'
+public_alb_listener_port: 80
+
+# Private ALB settings
+private_alb_listener_port: 80
+
+# ECS configuration
+ecs_state: absent
+
+# ECS Launch configuration
+ec2_ami_id: "ami-0adc4758ea76442e2"
+ec2_key_name: "key-pair"
+ec2_instance_type: "t2.micro"
+#ec2_userdata: |
+#  #!/bin/bash
+ # echo ECS_CLUSTER={{ cluster_name }} >> /etc/ecs/ecs.config;echo ECS_BACKEND_HOST= >> /etc/ecs/ecs.config;
+
+# ECS Autoscaling group
+ec2_asg_min_size: 0
+ec2_asg_max_size: 2
+ec2_asg_desired_capacity: 1
+
+
+# TG & ALB tags keys & values
+tagvalue_owner_email: "devops.support@nium.com"
+tagvalue_environment: "Perf"
+tagvalue_created_by: "devops.support@nium.com"
+tagvalue_created_date: "27th July 2021"
+tagvalue_lineofbusiness: "send"
+tagvalue_application: "Masspay"
+
+
+frontgw: masspayPerf-frontgw-tg
+
+
+
+
+
+
+#Container details
+alb_listener_port: 80
+tg_port: 80
+tg_unhealthy_threshold_count: 2
+tg_healthy_threshold_count: 2
+tg_health_check_timeout: 120
+tg_health_check_interval: 300
+tg_health_check_path: /
+tg_successful_response_codes: 200
+
+
+
+
+
+subnet_id_1: "subnet-03a889351ce1f6f31"
+subnet_id_2: "subnet-0b7b5c438c423f60f" 
+
+
+minimum_healthy_percent: 100
+maximum_percent: 200

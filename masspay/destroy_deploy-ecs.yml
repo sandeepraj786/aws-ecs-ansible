@@ -1,0 +1,30 @@
+- name: Create AWS resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - "vars/perf.yml"
+    - "vars/app.yml"
+  tasks: 
+
+    #Create a load balancer for ecs target group
+    - name: Create a load balancer for ecs target group
+      when: '(ecs_lb.load_balancers| length == 0)'
+      elb_application_lb:
+        name: '{{ app_name }}-ecs-lb'
+        security_groups: '{{ group_id }}'
+        subnets:
+          - "{{ pbl_subnet_a_id }}"
+          - "{{ pbl_subnet_b_id }}"
+        listeners:
+          - Protocol: HTTP
+            Port: '{{alb_listener_port}}'
+            DefaultActions:
+              - Type: forward
+                TargetGroupName: "{{ ecs_tg.target_groups[0].target_group_name if (ecs_tg.target_groups|length > 0) else ecs_tg_new.targ$
+        state: present
+      register: ecs_lb_new
+    - debug: var=ecs_lb_new verbosity=2
+
+
+
