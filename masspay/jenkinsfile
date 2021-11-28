@@ -20,8 +20,24 @@ pipeline{
             stage('Resource provisioning'){
                 steps{
                     script{
-                    sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/provision_ecs.yml --extra-vars 'state=${action}'"
-                    sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/deploy_ecs.yml --extra-vars 'state=${action}'"
+                        if (state=present){
+                        sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/provision_ecs.yml --extra-vars 'state=${action}'"
+                        sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/deploy_ecs.yml --extra-vars 'state=${action}'"
+
+                        }
+                    
+                    }
+                }
+            }
+            stage('Resource deprovisioning'){
+                steps{
+                    script{
+                        if (state=absent){
+                            sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/d1.yml --extra-vars 'state=${action}'"
+                            sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/destroy_ecs.yml --extra-vars 'state=${action}'"
+
+                        }
+                        
                     }
                 }
             }
