@@ -19,8 +19,10 @@ pipeline{
             }
             stage('Resource provisioning'){
                 steps{
+                    script{
                     sh " ansible-playbook Provision_ecs.yml --extra-vars 'state=${action}'"
                     sh " ansible-playbook deploy_ecs.yml --extra-vars 'state=${action}'"
+                    }
                 }
             }
         }
