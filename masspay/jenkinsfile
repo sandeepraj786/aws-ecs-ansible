@@ -10,7 +10,7 @@ pipeline{
                 steps{
                     script{
                         properties([
-                            parameter([
+                            parameters([
                                 string(name: 'action', defaultValue: "present", description: 'Resource provisioning and Resources deprovisioning '),
                             ])
                         ])
