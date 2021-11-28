@@ -1,0 +1,28 @@
+pipeline{
+    agent any{
+        stages{
+            stage('SCM Checkout'){
+                steps{
+                    git 'https://github.com/sandeepraj786/aws-ecs-ansible.git'
+                }
+            }
+            stage('passing the parameter'){
+                steps{
+                    script{
+                        properties([
+                            parameter([
+                                string(name: 'Action', defaultValue: "present", description: 'Resource provisioning and Resources deprovisioning '),
+                            ])
+                        ])
+                    }
+                }
+            }
+            stage('Resource provisioning'){
+                steps{
+                    sh " ansible-playbook Provision_ecs.yml --extra-vars 'state=${action}'"
+                    sh " ansible-playbook deploy_ecs.yml --extra-vars 'state=${action}'"
+                }
+            }
+        }
+    }
+}

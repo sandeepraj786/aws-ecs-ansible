@@ -5,8 +5,6 @@
   vars_files:
     - "vars/perf.yml"
   tasks:
-    
-    
     - name: Create ecsInstanceRole
       iam_role:
         name: ecsInstanceRole

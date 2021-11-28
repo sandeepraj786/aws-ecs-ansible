@@ -38,7 +38,7 @@ public_alb_listener_port: 80
 private_alb_listener_port: 80
 
 # ECS configuration
-ecs_state: absent
+ecs_state: '{{state}}'
 
 # ECS Launch configuration
 ec2_ami_id: "ami-0adc4758ea76442e2"
