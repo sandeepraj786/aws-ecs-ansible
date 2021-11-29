@@ -21,13 +21,11 @@ pipeline{
                 steps{
                     script{
                         if ("$env.state"=='present'){
-                            sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/provision_ecs.yml --extra-vars 'state=${action}'"
-                            sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/deploy_ecs.yml --extra-vars 'state=${action}'"
-
-                        }else if{
+                             sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/provision_ecs.yml --extra-vars 'state=${action}'"
+                             sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/deploy_ecs.yml --extra-vars 'state=${action}'"
+                        }else{
                             sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/d1.yml --extra-vars 'state=${action}'"
                             sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/destroy_ecs.yml --extra-vars 'state=${action}'"
-
 
                         }
                     
