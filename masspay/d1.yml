@@ -6,6 +6,7 @@
     - "vars/perf.yml"
     - "vars/app.yml"
   tasks:
+    
     - name: Get Service Data
       ecs_service_info:
         cluster: "{{cluster_name}}"
@@ -47,4 +48,14 @@
        state: absent
        name:  '{{ app_name }}'
        cluster:  "{{cluster_name}}"
-     
+
+    - name: Delete laodbalancer
+      elb_application_lb:
+       name: '{{ app_name }}-ecs-lb'
+       state: absent
+       
+    
+    - name: Delete a target group
+      elb_target_group:
+       name: '{{ app_name}}-ecs-tg'
+       state: absent   
