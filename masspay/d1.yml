@@ -54,6 +54,7 @@
       elb_application_lb:
        name: '{{ app_name }}-ecs-lb'
        state: absent
+       wait: yes
        
     
     - name: Delete a target group
