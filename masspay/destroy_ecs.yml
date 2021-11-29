@@ -32,7 +32,7 @@
     - debug: var=ecs_sg verbosity=2
 
 
-    - name: Create MasspayPerf Auto-scaling group for ECS   
+    - name: Delete MasspayPerf Auto-scaling group for ECS   
       tags: setup_ecs
       ec2_asg:
         name: "{{ cluster_name }}_ec2_asg"
@@ -55,7 +55,7 @@
       register: ec2_asg
     - debug: var=ec2_asg verbosity=2
 
-    - name: Create ECS Launch Configuration
+    - name: Delete ECS Launch Configuration
     #  when: update_all_components == true
       tags: setup_ecs
       ec2_lc:
@@ -75,8 +75,8 @@
 
    
     
-    #Create an ECS cluster for the application
-    - name: Create ECS cluster
+    #Delete an ECS cluster for the application
+    - name: Delete ECS cluster
       tags: setup_ecs
       ecs_cluster:
         name: "{{ cluster_name }}"
