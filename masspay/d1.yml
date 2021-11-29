@@ -57,5 +57,17 @@
     
     - name: Delete a target group
       elb_target_group:
-       name: '{{ app_name}}-ecs-tg'
-       state: absent   
+        name: '{{ app_name}}-ecs-tg'
+        vpc_id: '{{ vpc_id }}'
+        target_type: instance
+        protocol: HTTP
+        port: '{{ tg_port }}'
+        health_check_path: '{{ tg_health_check_path }}'
+        health_check_port: traffic-port
+        health_check_protocol: http
+        unhealthy_threshold_count: '{{ tg_unhealthy_threshold_count }}'
+        healthy_threshold_count: '{{ tg_healthy_threshold_count }}'
+        health_check_timeout: '{{ tg_health_check_timeout }}'
+        health_check_interval: '{{ tg_health_check_interval }}'
+        successful_response_codes: '{{tg_successful_response_codes}}'
+        state: absent
