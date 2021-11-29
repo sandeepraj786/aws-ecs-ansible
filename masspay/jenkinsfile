@@ -20,7 +20,9 @@ pipeline{
             stage('Resource provisioning'){
                 steps{
                     script{
+                        sh "cd masspay/"
                         if ("$action"=='present'){
+                            
                              sh "ansible-playbook provision_ecs.yml --extra-vars 'state=${action}'"
                              sh "ansible-playbook deploy_ecs.yml --extra-vars 'state=${action}'"
                         }else{
