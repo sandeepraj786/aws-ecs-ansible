@@ -7,6 +7,29 @@
     - "vars/app.yml"
   tasks:
     
+    - name: Delete laodbalancer
+      elb_application_lb:
+       name: '{{ app_name }}-ecs-lb'
+       state: absent
+       
+    
+    - name: Delete a target group
+      elb_target_group:
+        name: '{{ app_name}}-ecs-tg'
+        vpc_id: '{{ vpc_id }}'
+        target_type: instance
+        protocol: HTTP
+        port: '{{ tg_port }}'
+        health_check_path: '{{ tg_health_check_path }}'
+        health_check_port: traffic-port
+        health_check_protocol: http
+        unhealthy_threshold_count: '{{ tg_unhealthy_threshold_count }}'
+        healthy_threshold_count: '{{ tg_healthy_threshold_count }}'
+        health_check_timeout: '{{ tg_health_check_timeout }}'
+        health_check_interval: '{{ tg_health_check_interval }}'
+        successful_response_codes: '{{tg_successful_response_codes}}'
+        state: absent
+        
     - name: Get Service Data
       ecs_service_info:
         cluster: "{{cluster_name}}"
@@ -49,25 +72,4 @@
        name:  '{{ app_name }}'
        cluster:  "{{cluster_name}}"
 
-    - name: Delete laodbalancer
-      elb_application_lb:
-       name: '{{ app_name }}-ecs-lb'
-       state: absent
-       
     
-    - name: Delete a target group
-      elb_target_group:
-        name: '{{ app_name}}-ecs-tg'
-        vpc_id: '{{ vpc_id }}'
-        target_type: instance
-        protocol: HTTP
-        port: '{{ tg_port }}'
-        health_check_path: '{{ tg_health_check_path }}'
-        health_check_port: traffic-port
-        health_check_protocol: http
-        unhealthy_threshold_count: '{{ tg_unhealthy_threshold_count }}'
-        healthy_threshold_count: '{{ tg_healthy_threshold_count }}'
-        health_check_timeout: '{{ tg_health_check_timeout }}'
-        health_check_interval: '{{ tg_health_check_interval }}'
-        successful_response_codes: '{{tg_successful_response_codes}}'
-        state: absent
