@@ -20,32 +20,29 @@ pipeline{
             stage('Resource provisioning'){
                 steps{
                     script{
-                        sh "cd masspay/"
+                        
                         if ("$action"=='present'){
                             
-                             sh "ansible-playbook provision_ecs.yml --extra-vars 'state=${action}'"
-                             sh "ansible-playbook deploy_ecs.yml --extra-vars 'state=${action}'"
-                        }else{
-                            sh "ansible-playbook d1.yml --extra-vars 'state=${action}'"
-                            sh "ansible-playbook destroy_ecs.yml --extra-vars 'state=${action}'"
-
+                             sh "ansible-playbook masspay/provision_ecs.yml --extra-vars 'state=${action}'"
+                             sh "ansible-playbook masspay/deploy_ecs.yml --extra-vars 'state=${action}'"
                         }
+                        
+                            
                     
                     }
                 }
             }
-            // stage('Resource deprovisioning'){
-            //     steps{
-            //         script{
-            //             if (state=="absent"){
-            //                 sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/d1.yml --extra-vars 'state=${action}'"
-            //                 sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/destroy_ecs.yml --extra-vars 'state=${action}'"
-
-            //             }
+            stage('Resource deprovisioning'){
+                steps{
+                    script{
+                        if ("$action"=='absent'){
+                            sh "ansible-playbook masspay/d1.yml --extra-vars 'state=${action}'"
+                            sh "ansible-playbook masspay/destroy_ecs.yml --extra-vars 'state=${action}'"
+                        }
                         
-            //         }
-            //     }
-            // }
+                    }
+                }
+            }
         }
     
 }
