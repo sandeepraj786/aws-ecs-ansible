@@ -12,6 +12,8 @@ pipeline{
                         properties([
                             parameters([
                                 string(name: 'action', defaultValue: "present", description: 'Resource provisioning and Resources deprovisioning '),
+                                choice(name: 'Branch_name', choices: ['master','develop'], description: 'branch'),
+                               
                             ])
                         ])
                     }
@@ -26,7 +28,7 @@ pipeline{
                              sh "ansible-playbook masspay/provision_ecs.yml --extra-vars 'state=${action}'"
                              sh "ansible-playbook masspay/deploy_ecs.yml --extra-vars 'state=${action}'"
                         }
-                        
+
                             
                     
                     }
