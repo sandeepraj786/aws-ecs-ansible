@@ -20,7 +20,7 @@ pipeline{
             stage('Resource provisioning'){
                 steps{
                     script{
-                        if (env.state=='present'){
+                        if ("$env.state"=='present'){
                             sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/provision_ecs.yml --extra-vars 'state=${action}'"
                             sh "ansible-playbook /var/lib/jenkins/workspace/ecs-ansible-project/masspay/deploy_ecs.yml --extra-vars 'state=${action}'"
 
