@@ -1,5 +1,5 @@
 ---
-cluster_name: "masspayPerf"
+cluster_name: "sandeep"
 vpc_id: "vpc-09876364f22cfc4cf"
 vpc_cidr: "10.32.0.0/16"
 everywhere_cidr: "0.0.0.0/0"
@@ -43,7 +43,7 @@ ecs_state: '{{state}}'
 # ECS Launch configuration
 ec2_ami_id: "ami-0adc4758ea76442e2"
 ec2_key_name: "key-pair"
-ec2_instance_type: "t2.micro"
+ec2_instance_type: "t2.medium"
 #ec2_userdata: |
 #  #!/bin/bash
  # echo ECS_CLUSTER={{ cluster_name }} >> /etc/ecs/ecs.config;echo ECS_BACKEND_HOST= >> /etc/ecs/ecs.config;

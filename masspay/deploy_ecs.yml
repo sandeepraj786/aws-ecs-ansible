@@ -79,6 +79,8 @@
             image: '{{ app_image }}'
             cpu: '{{cpu}}'
             memory: "{{ container_memory}}"
+            softLimit: "{{softLimit}}"
+            hardLimit: "{{hardLimit}}"
             environment:
               - name: "{{host_name}}"
                 value: "{{host}}"

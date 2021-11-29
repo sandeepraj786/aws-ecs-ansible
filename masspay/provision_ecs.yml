@@ -12,8 +12,8 @@
         managed_policy:
           - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
         description: ECS instance role
-      register: masspayperf_ecs_instance_role
-    - debug: var=masspayperf_ecs_instance_role verbosity=2
+      register: sandeep_ecs_instance_role
+    - debug: var=sandeep_ecs_instance_role verbosity=2
 
     - name: Create ecsServiceRole
     #  when: update_all_components == true
@@ -23,8 +23,8 @@
         managed_policy:
           - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole
         description: ECS service role
-      register: MasspayPerf_ecs_service_role
-    - debug: var=MasspayPerf_ecs_service_role verbosity=2
+      register: sandeep_ecs_service_role
+    - debug: var=sandeep_ecs_service_role verbosity=2
 
 
     #Create an ECS cluster for the application
@@ -54,7 +54,7 @@
       register: ec2_lc
     - debug: var=ec2_lc verbosity=2
 
-    - name: Create MasspayPerf Auto-scaling group for ECS   
+    - name: Create sandeep Auto-scaling group for ECS   
       tags: setup_ecs
       ec2_asg:
         name: "{{ cluster_name }}_ec2_asg"
